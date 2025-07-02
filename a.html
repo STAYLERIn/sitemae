@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REGINA ESTUDOS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cor-fundo: #f0f4f8;
+      --cor-principal: #007bff;
+      --cor-texto: #333;
+      --cor-secundaria: #e9ecef;
+      --cor-hover: #0056b3;
+      --cor-botao: #28a745;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: var(--cor-fundo);
+      color: var(--cor-texto);
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: var(--cor-secundaria);
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-bottom: 3px solid var(--cor-principal);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin: 0;
+      color: var(--cor-principal);
+      letter-spacing: 2px;
+    }
+
+    main {
+      padding: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      border: 1px solid var(--cor-principal);
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 15px;
+      border: 1px solid var(--cor-principal);
+      text-align: center;
+    }
+
+    th {
+      background-color: var(--cor-principal);
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    tr.completed td {
+      text-decoration: line-through;
+      color: #999;
+      background-color: #f8d7da;
+    }
+
+    .today {
+      background-color: var(--cor-hover);
+      color: #fff;
+      font-weight: bold;
+    }
+
+    button {
+      margin-top: 5px;
+      background-color: var(--cor-botao);
+      border: none;
+      color: #fff;
+      padding: 8px 12px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: var(--cor-hover);
+    }
+
+    .sticky-note {
+      margin-top: 40px;
+      background-color: var(--cor-secundaria);
+      padding: 20px;
+      border-left: 6px solid var(--cor-principal);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .sticky-note h3 {
+      margin-top: 0;
+    }
+
+    .info {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: var(--cor-secundaria);
+      border: 1px solid var(--cor-principal);
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>REGINA ESTUDOS</h1>
+    <p>Cronograma de Estudos - EEB Supervisão Escolar (30/06 a 27/09/2025)</p>
+  </header>
+
+  <main>
+    <h2>Conteúdo do Dia</h2>
+    <div id="conteudo-dia">Carregando conteúdo do dia...</div>
+    <button id="marcar-conteudo-dia" style="display:none;">Marcar como Estudado</button>
+
+    <h2>Julho 2025</h2>
+    <table id="tabela-julho">
+      <thead>
+        <tr><th>Data</th><th>Manhã</th><th>Tarde</th><th>Estudado?</th></tr>
+      </thead>
+      <tbody id="corpo-tabela"></tbody>
+    </table>
+
+    <div class="sticky-note">
+      <h3>Dicas Importantes</h3>
+      <ul>
+        <li><b>Seg a Sex:</b> 2 conteúdos novos</li>
+        <li><b>Sábados:</b> Revisão + Redação ou Simulado</li>
+        <li><b>Domingo:</b> Descanso</li>
+        <li><b>Revisões:</b> semanais, quinzenais e finais</li>
+        <li><b>Técnica:</b> Conteúdo mais denso pela manhã</li>
+      </ul>
+    </div>
+
+    <div class="info">
+      <h3>Estrutura do Cronograma</h3>
+      <p>2 conteúdos por dia (manhã e tarde)</p>
+      <p>Revisões semanais dos conteúdos estudados</p>
+      <p>Simulados quinzenais das provas anteriores</p>
+      <p>2 redações por mês (total: 6 redações)</p>
+    </div>
+
+    <h2>Agosto 2025</h2>
+    <table id="tabela-agosto">
+      <thead>
+        <tr><th>Data</th><th>Manhã</th><th>Tarde</th><th>Estudado?</th></tr>
+      </thead>
+      <tbody id="corpo-tabela-agosto"></tbody>
+    </table>
+
+    <h2>Setembro 2025</h2>
+    <table id="tabela-setembro">
+      <thead>
+        <tr><th>Data</th><th>Manhã</th><th>Tarde</th><th>Estudado?</th></tr>
+      </thead>
+      <tbody id="corpo-tabela-setembro"></tbody>
+    </table>
+
+    <h2>Cronograma de Simulados</h2>
+    <table>
+      <thead>
+        <tr><th>Data</th><th>Tipo</th><th>Foco</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>12/07</td><td>Simulado 1</td><td>Língua Portuguesa e Matemática</td></tr>
+        <tr><td>26/07</td><td>Simulado 2</td><td>Direitos Humanos e início Legislação</td></tr>
+        <tr><td>09/08</td><td>Simulado 3</td><td>Literatura e Legislação Educacional</td></tr>
+        <tr><td>23/08</td><td>Simulado 4</td><td>Conhecimentos Específicos</td></tr>
+        <tr><td>06/09</td><td>Simulado 5</td><td>Prova completa mista</td></tr>
+        <tr><td>13/09</td><td>Simulado 6</td><td>Prova completa cronometrada</td></tr>
+        <tr><td>20/09</td><td>Simulado Final</td><td>Prova completa - teste final</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Cronograma de Redações</h2>
+    <table>
+      <thead>
+        <tr><th>Data</th><th>Redação</th><th>Tema Sugerido</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>05/07</td><td>Redação 1</td><td>"A importância da interpretação de textos na formação cidadã"</td></tr>
+        <tr><td>26/07</td><td>Redação 2</td><td>"Os desafios da inclusão escolar na educação brasileira"</td></tr>
+        <tr><td>16/08</td><td>Redação 3</td><td>"O papel da gestão democrática na qualidade educacional"</td></tr>
+        <tr><td>30/08</td><td>Redação 4</td><td>"A formação continuada de professores e supervisores escolares"</td></tr>
+        <tr><td>13/09</td><td>Redação 5</td><td>"Educação integral: desafios e possibilidades"</td></tr>
+        <tr><td>19/09</td><td>Redação 6</td><td>"Avaliação educacional como instrumento de melhoria"</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Distribuição dos Conteúdos por Disciplina</h2>
+    <h3>Língua Portuguesa (30 tópicos) - Julho</h3>
+    <p>Semanas 1-5: Base (interpretação, tipos de texto, discursos, figuras)</p>
+    <p>Semanas 6-8: Fonologia e ortografia</p>
+    <p>Semanas 9-10: Morfologia e sintaxe</p>
+    <p>Semanas 11-12: Literatura</p>
+
+    <h3>Matemática Aplicada (16 tópicos) - Julho</h3>
+    <p>Distribuída ao longo de julho intercalada com Português</p>
+
+    <h3>Direitos Humanos (6 tópicos) - Final julho/início agosto</h3>
+    <p>Conteúdo mais enxuto, estudado em 1 semana</p>
+
+    <h3>Legislação Educacional (13 tópicos) - Agosto</h3>
+    <p>2 semanas de estudo intensivo</p>
+
+    <h3>Conhecimentos Específicos (20 tópicos) - Agosto/setembro</h3>
+    <p>3 semanas de estudo + revisões</p>
+
+    <h2>Dicas Importantes</h2>
+    <h3>Organização Semanal</h3>
+    <ul>
+      <li><b>Segunda a sexta:</b> 2 conteúdos novos</li>
+      <li><b>Sábado:</b> Revisão + Simulado/Redação</li>
+      <li><b>Domingo:</b> Descanso</li>
+    </ul>
+
+    <h3>Técnicas de Estudo</h3>
+    <ul>
+      <li>Manhã: Conteúdo mais pesado (Português/Específicos)</li>
+      <li>Tarde: Conteúdo complementar (Matemática/Legislação)</li>
+      <li>Pausas: 15 min a cada 2h de estudo</li>
+      <li>Material: Lei seca sempre à mão</li>
+    </ul>
+
+    <h3>Estratégias de Revisão</h3>
+    <ul>
+      <li>Revisões imediatas: Final de cada semana</li>
+      <li>Revisões espaçadas: A cada 15 dias</li>
+      <li>Revisão intensiva: Últimas 2 semanas</li>
+      <li>Revisão leve: Últimos 3 dias</li>
+    </ul>
+
+    <p>Sucesso nos estudos! 📚✨</p>
+  </main>
+
+  <script>
+    const cronogramaJulho = [
+      { data: "30/06", manha: "Interpretação e compreensão de textos", tarde: "Cálculo aritmético básico" },
+      { data: "01/07", manha: "Funções da linguagem", tarde: "Porcentagem" },
+      { data: "02/07", manha: "Texto narrativo", tarde: "Acréscimos e descontos" },
+      { data: "03/07", manha: "Texto descritivo", tarde: "Proporcionalidade" },
+      { data: "04/07", manha: "Texto dissertativo", tarde: "Grandezas diretamente proporcionais" },
+      { data: "05/07", manha: "REVISÃO: Interpretação e tipos de texto", tarde: "REDAÇÃO 1" },
+      { data: "06/07", manha: "DESCANSO", tarde: "DESCANSO" },
+      { data: "07/07", manha: "Discurso direto", tarde: "Grandezas inversamente proporcionais" },
+      { data: "08/07", manha: "Discurso indireto", tarde: "Sequências numéricas" },
+      { data: "09/07", manha: "Discurso indireto livre", tarde: "Raciocínio lógico" },
+      { data: "10/07", manha: "Gênero poético", tarde: "Área de figuras planas" },
+      { data: "11/07", manha: "Figuras de linguagem", tarde: "Perímetro de figuras planas" },
+      { data: "12/07", manha: "REVISÃO: Discursos e figuras", tarde: "SIMULADO 1" },
+      { data: "13/07", manha: "DESCANSO", tarde: "DESCANSO" },
+      { data: "14/07", manha: "Fonemas: vogais, consoantes e semivogais", tarde: "Leitura de tabelas" },
+      { data: "15/07", manha: "Encontros vocálicos", tarde: "Leitura de gráficos" },
+      { data: "16/07", manha: "Encontros consonantais", tarde: "Leitura de pictogramas" },
+      { data: "17/07", manha: "Dígrafos", tarde: "Média aritmética" },
+      { data: "18/07", manha: "Classificação silábica", tarde: "Mediana" },
+      { data: "19/07", manha: "REVISÃO: Fonologia", tarde: "Moda" },
+      { data: "20/07", manha: "DESCANSO", tarde: "DESCANSO" },
+      { data: "21/07", manha: "Correção ortográfica", tarde: "Lei 13.146/2015 – Estatuto da Pessoa com Deficiência" },
+      { data: "22/07", manha: "Acentuação gráfica", tarde: "Lei 10.741/2003 – Estatuto do Idoso" },
+      { data: "23/07", manha: "Estrutura e formação de palavras", tarde: "Lei 8.069/1990 – Estatuto da Criança e do Adolescente (ECA)" },
+      { data: "24/07", manha: "Morfemas e afixos", tarde: "Declaração de Salamanca" },
+      { data: "25/07", manha: "Processos de formação de palavras", tarde: "Declaração Universal dos Direitos Humanos" },
+      { data: "26/07", manha: "REVISÃO: Ortografia e morfologia", tarde: "SIMULADO 2 + REDAÇÃO 2" },
+      { data: "27/07", manha: "DESCANSO", tarde: "DESCANSO" },
+      { data: "28/07", manha: "Classes gramaticais: identificação", tarde: "Cartilha de Enfrentamento ao Assédio Sexual nas Escolas (MG)" },
+      { data: "29/07", manha: "Classes gramaticais: classificações", tarde: "Constituição Federal: art. 5º" },
+      { data: "30/07", manha: "Classes gramaticais: uso correto", tarde: "Constituição Federal: art. 6º" },
+      { data: "31/07", manha: "Frase, oração e período", tarde: "Constituição Federal: art. 37" }
+    ];
+
+    const cronogramaAgosto = [
+      { data: "01/08", manha: "Termos da oração", tarde: "Constituição Federal: arts. 205 a 214" },
+      { data: "02/08", manha: "REVISÃO: Classes gramaticais e sintaxe", tarde: "Constituição Estadual de MG: Título IV, Cap. I, Seção III" },
+      { data: "03/08", manha: "DESCANSO", tarde: "DESCANSO" },
+      { data: "04/08", manha: "Denotação e conotação", tarde: "Lei 9.394/1996 – LDB (Parte 1)" },
+      { data: "05/08", manha: "Texto literário", tarde: "Lei 9.394/1996 – LDB (Parte 2)" },
+      { data: "06/08", manha: "Gêneros literários", tarde: "Lei 13.005/2014 – Plano Nacional de Educação (PNE)" },
+      { data: "07/08", manha: "Escolas literárias brasileiras", tarde: "Lei 869/1952 – Estatuto dos servidores públicos civis de MG" },
+      { data: "08/08", manha: "Principais autores de cada período", tarde: "Lei 7.109/1977 – Estatuto do Magistério Público de MG" },
+      { data: "09/08", manha: "REVISÃO: Literatura brasileira", tarde: "SIMULADO 3" },
+      { data: "10/08", manha: "DESCANSO", tarde: "DESCANSO" },
+      { data: "11/08", manha: "Princípios e fins da educação nacional", tarde: "Lei 15.293/2004 – Carreiras dos profissionais da educação de MG" },
+      { data: "12/08", manha: "Níveis de ensino (Educação Infantil, Fundamental, Médio)", tarde: "Decreto 46.644/2014 – Código de conduta ética" },
+      { data: "13/08", manha: "Modalidades de ensino (Educação Especial, EJA, Profissional etc.)", tarde: "Lei 23.197/2018 – Plano Estadual de Educação (PEE) 2018-2027" },
+      { data: "14/08", manha: "Organização das Escolas Estaduais de MG", tarde: "Resolução SEE nº 4.948/2024 – Organização das Escolas Estaduais de MG" },
+      { data: "15/08", manha: "Atribuições dos Especialistas da Educação Básica", tarde: "REVISÃO: Legislação Educacional (Parte 1)" },
+      { data: "16/08", manha: "REVISÃO: Níveis e modalidades de ensino", tarde: "REDAÇÃO 3" },
+      { data: "17/08", manha: "DESCANSO", tarde: "DESCANSO" },
+      { data: "18/08", manha: "Papel do supervisor escolar na prática pedagógica", tarde: "REVISÃO: Legislação Educacional (Parte 2)" },
+      { data: "19/08", manha: "BNCC – fundamentos e competências gerais", tarde: "REVISÃO: Direitos Humanos" },
+      { data: "20/08", manha: "Currículo: inclusão, diversidade e direito à aprendizagem", tarde: "REVISÃO: Matemática Aplicada" },
+      { data: "21/08", manha: "Projeto Político-Pedagógico (PPP)", tarde: "REVISÃO: Língua Portuguesa (Parte 1)" },
+      { data: "22/08", manha: "Relação entre PPP, plano de ensino e plano de aula", tarde: "REVISÃO: Língua Portuguesa (Parte 2)" },
+      { data: "23/08", manha: "REVISÃO: PPP e currículo", tarde: "SIMULADO 4" },
+      { data: "24/08", manha: "DESCANSO", tarde: "DESCANSO" },
+      { data: "25/08", manha: "Gestão da sala de aula e planejamento participativo", tarde: "REVISÃO GERAL: Língua Portuguesa" },
+      { data: "26/08", manha: "Interdisciplinaridade na prática docente", tarde: "REVISÃO GERAL: Matemática Aplicada" },
+      { data: "27/08", manha: "Avaliação da aprendizagem em um currículo inclusivo", tarde: "REVISÃO GERAL: Direitos Humanos" },
+      { data: "28/08", manha: "Avaliação externa e avaliação institucional", tarde: "REVISÃO GERAL: Legislação Educacional" },
+      { data: "29/08", manha: "Política de Educação Integral", tarde: "REVISÃO GERAL: Conhecimentos Específicos (Parte 1)" },
+      { data: "30/08", manha: "REVISÃO: Gestão e avaliação", tarde: "REDAÇÃO 4" },
+      { data: "31/08", manha: "DESCANSO", tarde: "DESCANSO" }
+    ];
+
+    const cronogramaSetembro = [
+      { data: "01/09", manha: "Educação Especial Inclusiva: práticas e desafios", tarde: "REVISÃO GERAL: Conhecimentos Específicos (Parte 2)" },
+      { data: "02/09", manha: "Gestão Democrática: princípios e instrumentos", tarde: "REVISÃO: Interpretação de textos e funções da linguagem" },
+      { data: "03/09", manha: "Colegiados escolares", tarde: "REVISÃO: Tipos de texto e discursos" },
+      { data: "04/09", manha: "Conselhos de classe e reuniões pedagógicas", tarde: "REVISÃO: Fonologia e ortografia" },
+      { data: "05/09", manha: "Relação escola-família-comunidade", tarde: "REVISÃO: Morfologia e classes gramaticais" },
+      { data: "06/09", manha: "REVISÃO: Gestão democrática", tarde: "SIMULADO 5" },
+      { data: "07/09", manha: "DESCANSO", tarde: "DESCANSO" },
+      { data: "08/09", manha: "REVISÃO INTENSIVA: Conhecimentos Específicos completos", tarde: "REVISÃO: Sintaxe e literatura" },
+      { data: "09/09", manha: "REVISÃO INTENSIVA: Língua Portuguesa completa", tarde: "REVISÃO: Matemática - cálculos e porcentagem" },
+      { data: "10/09", manha: "REVISÃO INTENSIVA: Matemática Aplicada completa", tarde: "REVISÃO: Matemática - geometria e estatística" },
+      { data: "11/09", manha: "REVISÃO INTENSIVA: Direitos Humanos completo", tarde: "REVISÃO: Legislação - Constituição" },
+      { data: "12/09", manha: "REVISÃO INTENSIVA: Legislação Educacional completa", tarde: "REVISÃO: Legislação - Leis específicas" },
+      { data: "13/09", manha: "SIMULADO 6: Prova completa cronometrada", tarde: "REDAÇÃO 5" },
+      { data: "14/09", manha: "DESCANSO", tarde: "DESCANSO" },
+      { data: "15/09", manha: "REVISÃO: Pontos mais difíceis - Língua Portuguesa", tarde: "REVISÃO: Pontos mais difíceis - Matemática" },
+      { data: "16/09", manha: "REVISÃO: Pontos mais difíceis - Direitos Humanos", tarde: "REVISÃO: Pontos mais difíceis - Legislação" },
+      { data: "17/09", manha: "REVISÃO: Pontos mais difíceis - Conhecimentos Específicos", tarde: "SIMULADO: Questões de provas anteriores" },
+      { data: "18/09", manha: "REVISÃO FINAL: Todos os conteúdos (Parte 1)", tarde: "REVISÃO FINAL: Todos os conteúdos (Parte 2)" },
+      { data: "19/09", manha: "REVISÃO FINAL: Todos os conteúdos (Parte 3)", tarde: "REDAÇÃO 6" },
+      { data: "20/09", manha: "SIMULADO FINAL: Prova completa cronometrada", tarde: "Relaxamento e revisão leve" },
+      { data: "21/09", manha: "DESCANSO", tarde: "DESCANSO" },
+      { data: "22/09", manha: "Revisão rápida dos principais tópicos", tarde: "Resolução de questões pontuais" },
+      { data: "23/09", manha: "Revisão das redações feitas", tarde: "Técnicas de prova e gestão do tempo" },
+      { data: "24/09", manha: "Revisão final leve", tarde: "Preparação psicológica" },
+      { data: "25/09", manha: "Revisão dos pontos-chave", tarde: "Descanso" },
+      { data: "26/09", manha: "Revisão muito leve", tarde: "Preparação material da prova" },
+      { data: "27/09", manha: "🎯 DIA DA PROVA", tarde: "🎯 DIA DA PROVA" }
+    ];
+
+    const corpoTabelaJulho = document.getElementById("corpo-tabela");
+    const corpoTabelaAgosto = document.getElementById("corpo-tabela-agosto");
+    const corpoTabelaSetembro = document.getElementById("corpo-tabela-setembro");
+    const conteudoDia = document.getElementById("conteudo-dia");
+    const marcarConteudoDia = document.getElementById("marcar-conteudo-dia");
+    const hoje = new Date();
+
+    cronogramaJulho.forEach((item) => {
+      const tr = document.createElement("tr");
+
+      const dataCompleta = `2025-${item.data.split('/')[1]}-${item.data.split('/')[0]}`;
+      const dataItem = new Date(dataCompleta);
+      const isHoje = hoje.toDateString() === dataItem.toDateString();
+
+      tr.innerHTML = `
+        <td class="${isHoje ? 'today' : ''}">${item.data}</td>
+        <td>${item.manha}</td>
+        <td>${item.tarde}</td>
+        <td><button onclick="marcarEstudo(this)">✔️</button></td>
+      `;
+
+      corpoTabelaJulho.appendChild(tr);
+
+      if (isHoje) {
+        conteudoDia.innerText = `${item.data} → Manhã: ${item.manha} | Tarde: ${item.tarde}`;
+        marcarConteudoDia.style.display = "inline-block";
+        marcarConteudoDia.onclick = () => marcarConteudoDiaEstudado(item, tr);
+      }
+    });
+
+    cronogramaAgosto.forEach((item) => {
+      const tr = document.createElement("tr");
+
+      const dataCompleta = `2025-${item.data.split('/')[1]}-${item.data.split('/')[0]}`;
+      const dataItem = new Date(dataCompleta);
+      const isHoje = hoje.toDateString() === dataItem.toDateString();
+
+      tr.innerHTML = `
+        <td class="${isHoje ? 'today' : ''}">${item.data}</td>
+        <td>${item.manha}</td>
+        <td>${item.tarde}</td>
+        <td><button onclick="marcarEstudo(this)">✔️</button></td>
+      `;
+
+      corpoTabelaAgosto.appendChild(tr);
+    });
+
+    cronogramaSetembro.forEach((item) => {
+      const tr = document.createElement("tr");
+
+      const dataCompleta = `2025-${item.data.split('/')[1]}-${item.data.split('/')[0]}`;
+      const dataItem = new Date(dataCompleta);
+      const isHoje = hoje.toDateString() === dataItem.toDateString();
+
+      tr.innerHTML = `
+        <td class="${isHoje ? 'today' : ''}">${item.data}</td>
+        <td>${item.manha}</td>
+        <td>${item.tarde}</td>
+        <td><button onclick="marcarEstudo(this)">✔️</button></td>
+      `;
+
+      corpoTabelaSetembro.appendChild(tr);
+    });
+
+    function marcarEstudo(botao) {
+      const linha = botao.parentElement.parentElement;
+      linha.classList.toggle("completed");
+      salvarEstado();
+    }
+
+function marcarConteudoDiaEstudado(item, linhaTabela) {
+  alert(`Conteúdo do dia marcado como estudado: ${item.manha} e ${item.tarde}`);
+  const botao = linhaTabela.querySelector('button');
+  marcarEstudo(botao);
+  salvarEstado();
+}
+
+    function salvarEstado() {
+      const linhas = document.querySelectorAll("#corpo-tabela tr, #corpo-tabela-agosto tr, #corpo-tabela-setembro tr");
+      const estado = Array.from(linhas).map(linha => linha.classList.contains("completed"));
+      localStorage.setItem("estadoEstudos", JSON.stringify(estado));
+    }
+
+    function carregarEstado() {
+      const estado = JSON.parse(localStorage.getItem("estadoEstudos"));
+      if (estado) {
+        const linhas = document.querySelectorAll("#corpo-tabela tr, #corpo-tabela-agosto tr, #corpo-tabela-setembro tr");
+        linhas.forEach((linha, index) => {
+          if (estado[index]) {
+            linha.classList.add("completed");
+          }
+        });
+      }
+    }
+
+    window.onload = carregarEstado;
+  </script>
+</body>
+</html>
