@@ -378,7 +378,7 @@
 
     const [dia, mes] = item.data.split('/');
     const dataItem = new Date(2025, parseInt(mes) - 1, parseInt(dia));
-      const isHoje = hoje.toDateString() === dataItem.toDateString();
+    const isHoje = hoje.toDateString() === dataItem.toDateString();
 
       tr.innerHTML = `
         <td class="${isHoje ? 'today' : ''}">${item.data}</td>
@@ -395,7 +395,7 @@
   
   const [dia, mes] = item.data.split('/');
   const dataItem = new Date(2025, parseInt(mes) - 1, parseInt(dia));
-        const isHoje = hoje.toDateString() === dataItem.toDateString();
+  const isHoje = hoje.toDateString() === dataItem.toDateString();
 
       tr.innerHTML = `
         <td class="${isHoje ? 'today' : ''}">${item.data}</td>
