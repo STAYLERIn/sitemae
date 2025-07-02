@@ -353,8 +353,8 @@
     cronogramaJulho.forEach((item) => {
       const tr = document.createElement("tr");
 
-      const dataCompleta = `2025-${item.data.split('/')[1]}-${item.data.split('/')[0]}`;
-      const dataItem = new Date(dataCompleta);
+      const [dia, mes] = item.data.split('/');
+      const dataItem = new Date(2025, parseInt(mes) - 1, parseInt(dia));
       const isHoje = hoje.toDateString() === dataItem.toDateString();
 
       tr.innerHTML = `
@@ -376,8 +376,8 @@
     cronogramaAgosto.forEach((item) => {
       const tr = document.createElement("tr");
 
-      const dataCompleta = `2025-${item.data.split('/')[1]}-${item.data.split('/')[0]}`;
-      const dataItem = new Date(dataCompleta);
+    const [dia, mes] = item.data.split('/');
+    const dataItem = new Date(2025, parseInt(mes) - 1, parseInt(dia));
       const isHoje = hoje.toDateString() === dataItem.toDateString();
 
       tr.innerHTML = `
@@ -392,10 +392,10 @@
 
     cronogramaSetembro.forEach((item) => {
       const tr = document.createElement("tr");
-
-      const dataCompleta = `2025-${item.data.split('/')[1]}-${item.data.split('/')[0]}`;
-      const dataItem = new Date(dataCompleta);
-      const isHoje = hoje.toDateString() === dataItem.toDateString();
+  
+  const [dia, mes] = item.data.split('/');
+  const dataItem = new Date(2025, parseInt(mes) - 1, parseInt(dia));
+        const isHoje = hoje.toDateString() === dataItem.toDateString();
 
       tr.innerHTML = `
         <td class="${isHoje ? 'today' : ''}">${item.data}</td>
