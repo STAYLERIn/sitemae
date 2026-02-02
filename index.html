@@ -1,624 +1,1123 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calendário de Estudos Progressivo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0c10" />
+  <title>Planilha de Treino | Tracker</title>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f2f5;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    :root{
+      --bg:#070910;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.12);
+      --text:#eaf0ff;
+      --muted:#a8b6d8;
+
+      /* “iPhone vibe” */
+      --brand:#7c5cff;
+      --brand2:#37d3ff;
+      --ok:#39d98a;
+      --warn:#ffcc66;
+      --danger:#ff5c7a;
+
+      --ring: rgba(124,92,255,.30);
+      --shadow: 0 10px 30px rgba(0,0,0,.40);
+      --shadow2: 0 18px 60px rgba(0,0,0,.55);
+
+      --r: 22px;
+      --r2: 16px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue";
     }
 
-    h1 {
-      margin: 20px 0 10px 0;
-      color: #333;
-      font-size: 24px;
+    *{box-sizing:border-box}
+    html, body{height:100%}
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(900px 520px at 15% -10%, rgba(124,92,255,.35), transparent 62%),
+        radial-gradient(700px 420px at 85% 5%, rgba(55,211,255,.22), transparent 60%),
+        radial-gradient(700px 420px at 50% 110%, rgba(57,217,138,.10), transparent 62%),
+        linear-gradient(180deg, #050610, #070910 45%, #050610);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x:hidden;
+      padding-bottom: calc(280px + env(safe-area-inset-bottom)); /* espaço para o bottom sheet */
     }
 
-    .month-nav {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 10px;
+    /* Container mobile-first */
+    .wrap{
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 14px 14px 22px;
     }
 
-    .month-nav button {
-      background: #4a6cf7;
-      border: none;
-      color: white;
-      font-size: 18px;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.3s;
+    /* Top bar estilo app */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding-top: env(safe-area-inset-top);
+      background: rgba(7,9,16,.72);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
     }
-
-    .month-nav button:hover {
-      background: #354ed1;
-    }
-
-    .calendar {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
+    .topbarInner{
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 12px 14px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       gap: 10px;
-      width: 100%;
-      max-width: 900px;
-      margin: 20px;
-      box-sizing: border-box;
     }
 
-    .day {
-      background: white;
-      border-radius: 10px;
-      padding: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 140px;
-      cursor: pointer;
-      transition: 0.3s;
-      text-align: center;
-      box-sizing: border-box;
+    .titleBlock{
+      display:flex;
+      flex-direction:column;
+      gap: 4px;
+      min-width:0;
     }
-
-    .day.complete {
-      background: #b6f0b0;
-    }
-
-    .day.free {
-      background: #e0e0e0;
-      cursor: default;
-    }
-
-    .day h3 {
-      margin: 5px 0;
+    .appTitle{
+      margin:0;
       font-size: 16px;
-      color: #444;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .badge{
+      font-size: 11px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(90deg, rgba(124,92,255,.18), rgba(55,211,255,.14));
+      color: var(--muted);
+      width: fit-content;
+    }
+    .pill{
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color: var(--muted);
+      font-family: var(--mono);
+      white-space:nowrap;
     }
 
-    .subject {
-      margin: 5px 0;
-      padding: 8px 12px;
-      background: #eaf2ff;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: 0.3s;
-      width: 100%;
-      text-align: center;
+    /* Botões: grandes e “touch friendly” */
+    button, .btn{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 14px;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:active{ transform: scale(.98); }
+
+    .btnPrimary{
+      background: linear-gradient(90deg, rgba(124,92,255,.92), rgba(55,211,255,.80));
+      border-color: rgba(255,255,255,.16);
+      color: #061018;
+      font-weight: 800;
+    }
+    .btnDanger{
+      border-color: rgba(255,92,122,.22);
+    }
+
+    .iconBtn{
+      width: 42px;
+      height: 42px;
+      display:grid;
+      place-items:center;
+      padding:0;
+      border-radius: 14px;
+    }
+
+    /* Card padrão */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .cardHead{
+      padding: 14px 14px 12px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .cardHead h2{
+      margin:0;
       font-size: 14px;
-      white-space: normal;
-      word-wrap: break-word;
+      letter-spacing:.2px;
+    }
+    .cardBody{ padding: 14px; }
+
+    .smallText{ font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .hr{ height:1px; background: rgba(255,255,255,.08); margin: 12px 0; }
+
+    /* Tabs estilo iOS com scroll horizontal */
+    .tabs{
+      display:flex;
+      gap: 10px;
+      overflow-x:auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar{ display:none; }
+
+    .tab{
+      flex: 0 0 auto;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--muted);
+      cursor:pointer;
+      background: rgba(255,255,255,.06);
+      transition: .18s ease;
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .tab.active{
+      color: #071018;
+      background: linear-gradient(90deg, rgba(57,217,138,.85), rgba(55,211,255,.78));
+      border-color: rgba(255,255,255,.16);
+      font-weight: 850;
     }
 
-    .subject.done {
-      background: #b6f0b0;
-      text-decoration: line-through;
-      color: #444;
+    /* Exercícios (accordion) */
+    details{
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: var(--r2);
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+      margin-bottom: 12px;
+    }
+    summary{
+      list-style:none;
+      cursor:pointer;
+      padding: 14px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      user-select:none;
+    }
+    summary::-webkit-details-marker{ display:none; }
+
+    .sumLeft{
+      display:flex;
+      flex-direction:column;
+      gap: 4px;
+      min-width:0;
+    }
+    .exName{
+      font-weight: 850;
+      letter-spacing:.2px;
+      font-size: 14px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .exMeta{
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.2;
+    }
+    .sumRight{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      color: var(--muted);
+      font-size: 11px;
+      font-family: var(--mono);
+      flex: 0 0 auto;
+    }
+    .kpi{
+      padding: 6px 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      white-space:nowrap;
     }
 
-    .subject:hover {
-      background: #cfdfff;
+    .exBody{
+      padding: 12px 14px 14px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      display:grid;
+      gap: 12px;
     }
 
-    .rest {
-      margin: 5px 0;
-      padding: 8px 12px;
-      background: #f0f0f0;
-      border-radius: 6px;
-      width: 100%;
-      text-align: center;
-      font-style: italic;
+    /* Inputs e tabela mobile-friendly */
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      overflow:hidden;
+      background: rgba(255,255,255,.03);
+    }
+    th, td{
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      font-size: 12px;
+      vertical-align: middle;
+    }
+    th{
+      text-align:left;
+      color: var(--muted);
+      font-weight: 800;
+      background: rgba(0,0,0,.18);
+    }
+    tr:last-child td{ border-bottom:none; }
+
+    input[type="number"]{
+      width:100%;
+      padding: 11px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline:none;
+      transition: .18s ease;
       font-size: 14px;
     }
-
-    @media (max-width: 768px) {
-      .calendar {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-        margin: 10px;
-      }
-
-      .day {
-        min-height: 160px;
-        padding: 10px;
-      }
-
-      .month-nav {
-        gap: 10px;
-      }
-
-      .month-nav button {
-        font-size: 16px;
-        padding: 8px 12px;
-      }
-
-      h1 {
-        font-size: 20px;
-      }
-
-      .day h3 {
-        font-size: 14px;
-      }
-
-      .subject {
-        font-size: 12px;
-        padding: 6px 8px;
-      }
-
-      .rest {
-        font-size: 12px;
-      }
+    input[type="number"]:focus{
+      border-color: rgba(124,92,255,.55);
+      box-shadow: 0 0 0 6px var(--ring);
     }
 
-    @media (max-width: 480px) {
-      .calendar {
-        grid-template-columns: 1fr;
-        gap: 6px;
-      }
+    .mini{
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 800;
+    }
 
-      .day {
-        min-height: 180px;
-      }
+    /* Linha de ações fica em coluna no mobile */
+    .rowActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .rowActions button{ flex: 1 1 48%; }
+
+    .hint{
+      font-size: 12px;
+      color: var(--muted);
+      line-height:1.35;
+      border: 1px dashed rgba(255,255,255,.14);
+      border-radius: 16px;
+      padding: 10px 10px;
+      background: rgba(255,255,255,.04);
+    }
+
+    /* “Bottom sheet” do timer */
+    .sheet{
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+      background: rgba(7,9,16,.72);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,.10);
+    }
+    .sheetInner{
+      max-width: 520px;
+      margin: 0 auto;
+      display:grid;
+      gap: 10px;
+    }
+    .timerCard{
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(124,92,255,.14), rgba(0,0,0,.22));
+      box-shadow: var(--shadow2);
+      padding: 12px 14px;
+      display:grid;
+      gap: 10px;
+    }
+    .timerTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      min-width:0;
+    }
+    .timerTitle{
+      display:flex;
+      flex-direction:column;
+      gap: 4px;
+      min-width:0;
+    }
+    .timerTitle b{
+      font-size: 13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .timerTitle span{
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .time{
+      font-family: var(--mono);
+      font-size: 34px;
+      letter-spacing: .8px;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+    .timerBtns{
+      display:flex;
+      gap: 10px;
+    }
+    .timerBtns button{
+      flex: 1 1 0;
+      height: 46px;
+      font-size: 13px;
+      border-radius: 16px;
+      font-weight: 900;
+    }
+
+    /* KPIs compactos no sheet */
+    .kpis{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .stat{
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,.18);
+    }
+    .stat .label{
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .stat .value{
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    /* Histórico em card separado */
+    .historyCard{
+      margin-top: 12px;
+    }
+
+    /* Toast */
+    .toast{
+      position: fixed;
+      left: 50%;
+      top: calc(10px + env(safe-area-inset-top));
+      transform: translateX(-50%);
+      background: rgba(15,20,32,.92);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 10px 12px;
+      border-radius: 999px;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .2s ease, transform .2s ease;
+      font-size: 12px;
+      z-index: 80;
+    }
+    .toast.show{
+      opacity:1;
+      transform: translateX(-50%) translateY(2px);
+    }
+
+    /* Desktop: ainda funciona, mas mobile é prioridade */
+    @media (min-width: 900px){
+      .wrap{ max-width: 900px; }
+      .topbarInner{ max-width: 900px; }
+      .sheetInner{ max-width: 900px; }
+      body{ padding-bottom: 260px; }
     }
   </style>
 </head>
+
 <body>
-  <h1>📅 Calendário de Estudos Progressivo</h1>
-  <div class="month-nav">
-    <button id="prevMonth">⬅️</button>
-    <h2 id="monthYear"></h2>
-    <button id="nextMonth">➡️</button>
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbarInner">
+      <div class="titleBlock">
+        <div class="appTitle">🏋️‍♂️ Planilha de Treino <span class="badge">iPhone Mode</span></div>
+        <div id="todayPill" class="pill">Carregando...</div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button id="btnExport" class="iconBtn btnPrimary" title="Exportar CSV">⬇️</button>
+        <button id="btnBackup" class="iconBtn" title="Backup JSON">🧾</button>
+        <label class="iconBtn btn" title="Importar JSON" style="display:grid;place-items:center;">
+          📤
+          <input id="importFile" type="file" accept="application/json" style="display:none" />
+        </label>
+        <button id="btnReset" class="iconBtn btnDanger" title="Reset">🗑️</button>
+      </div>
+    </div>
   </div>
-  <div class="calendar" id="calendar"></div>
 
-  <script>
-    // Definição das matérias e conteúdos progressivos
-    const subjects = {
-      port: {
-        name: "Português",
-        contents: [
-          "Fonemas básicos: vogais orais e nasais, consoantes oclusivas e fricativas",
-          "Fonemas avançados: semivogais, encontros vocálicos (hiato, ditongo, tritongo)",
-          "Encontros consonantais e dígrafos (consonantais e vocálicos)",
-          "Classificação silábica: monossílabas, dissílabas, polissílabas; divisão silábica básica",
-          "Regras de divisão silábica avançada: com dígrafos e encontros consonantais",
-          "Correção ortográfica básica: emprego de s/ss, z/ç, g/j, x/ch",
-          "Acentuação gráfica: regras para oxítonas, paroxítonas e proparoxítonas",
-          "Acentuação avançada: ditongos, hiatos, acentos diferenciais",
-          "Emprego de letras maiúsculas/minúsculas; hífen no Novo Acordo Ortográfico",
-          "Estrutura de palavras: radical, tema, desinências nominais/verbais",
-          "Morfemas e afixos: prefixos, sufixos, infixos",
-          "Processos de formação de palavras: derivação, composição, onomatopeia, abreviação",
-          "Classes gramaticais básicas: substantivo (comum/próprio), adjetivo (simples/composto)",
-          "Classes gramaticais intermediárias: verbo (tempos/modos), artigo (definido/indefinido)",
-          "Classes gramaticais avançadas: preposição, conjunção, advérbio, interjeição",
-          "Frase, oração e período: distinção básica, período simples",
-          "Termos da oração: sujeito (simples/composto/indeterminado), predicado (verbal/nominal)",
-          "Complementos verbais: objeto direto/indireto, predicativo do sujeito/objeto",
-          "Período composto: coordenação (sindética/assindética)",
-          "Orações subordinadas substantivas: subjetiva, objetiva direta/indireta, completiva",
-          "Orações subordinadas adjetivas: restritiva e explicativa",
-          "Orações subordinadas adverbiais: causal, concessiva, condicional, final",
-          "Concordância verbal: regras básicas com sujeito composto, coletivo",
-          "Concordância nominal: com adjetivos, artigos, pronomes",
-          "Regência verbal e nominal: verbos transitivos/intransitivos, preposições",
-          "Colocação pronominal: próclise, mesóclise, ênclise",
-          "Emprego do sinal indicativo de crase: regras com artigos, preposições",
-          "Pontuação básica: vírgula em adjuntos, vocativos, apostos",
-          "Pontuação avançada: vírgula em orações coordenadas/subordinadas, concessão",
-          "Semântica básica: sinônimos, antônimos, homônimos, parônimos",
-          "Denotação e conotação; polissemia, ambiguidade",
-          "Figuras de linguagem: metáfora, metonímia, personificação",
-          "Funções da linguagem: referencial, emotiva, apelativa, metalinguística",
-          "Tipos de texto: narrativo (elementos: enredo, personagens)",
-          "Texto descritivo: características, adjetivos sensoriais",
-          "Texto dissertativo-argumentativo: tese, argumentos, conclusão",
-          "Gêneros textuais: artigo, crônica, fábula, notícia",
-          "Coerência textual: lógica interna, continuidade de ideias",
-          "Coesão textual: referencial (anáfora, catáfora), conectores",
-          "Interpretação de textos: inferências, implícitos, contexto",
-          "Compreensão avançada: reescrita, parafrase, resumo",
-          "Texto literário vs. não literário; gêneros literários (épico, lírico, dramático)",
-          "Escolas literárias brasileiras: barroco, arcadismo, romantismo",
-          "Principais autores e obras: Machado de Assis, Guimarães Rosa, Clarice Lispector",
-          "Correspondência oficial: ofício, memorando, e-mail formal"
-        ]
-      },
-      mat: {
-        name: "Matemática",
-        contents: [
-          "Números inteiros e reais: operações básicas (adição, subtração)",
-          "Operações avançadas: multiplicação, divisão, propriedades comutativa/associativa",
-          "Frações: simplificação, operações com frações próprias/impróprias",
-          "Decimais e dízimas periódicas: conversão fração-decimal",
-          "Porcentagem básica: cálculo de porcentagens simples, aumentos/diminuições",
-          "Acréscimos e descontos: aplicações em compras/vendas",
-          "Proporcionalidade direta: grandezas diretamente proporcionais, regra de três simples",
-          "Proporcionalidade inversa: grandezas inversamente proporcionais",
-          "Regra de três composta: múltiplas proporções",
-          "Sequências numéricas básicas: aritméticas (progressão comum)",
-          "Sequências geométricas: razão constante",
-          "Raciocínio lógico sequencial: padrões numéricos, séries",
-          "Lógica proposicional: conectivos (e, ou, não, se-então)",
-          "Tabelas-verdade: avaliação de proposições compostas",
-          "Argumentação lógica: silogismos, falácias",
-          "Análise combinatória básica: princípio fundamental da contagem",
-          "Permutações e combinações simples",
-          "Probabilidade básica: espaço amostral, eventos",
-          "Probabilidade condicional e independente",
-          "Leitura de tabelas e gráficos: barras, linhas, setores",
-          "Leitura de pictogramas e histogramas",
-          "Medidas de tendência: média aritmética simples/ponderada",
-          "Mediana e moda: em conjuntos ordenados/desordenados",
-          "Medidas de dispersão: variância, desvio padrão",
-          "Geometria plana básica: perímetro de polígonos regulares",
-          "Área de figuras planas: triângulos, quadriláteros, círculos",
-          "Geometria espacial: volumes de prismas, pirâmides, esferas",
-          "Trigonometria básica: seno, cosseno, tangente em triângulos retângulos",
-          "Conjuntos básicos: notação, pertinência, inclusão",
-          "Operações com conjuntos: união, interseção, diferença, complemento",
-          "Equações de 1º grau: resolução, desigualdades",
-          "Equações de 2º grau: fórmula quadrática, raízes",
-          "Sistemas lineares: substituição, eliminação",
-          "Matrizes e determinantes: operações básicas",
-          "Juros simples: fórmulas, aplicações",
-          "Juros compostos: capitalização, montante",
-          "Taxas de juros: efetiva, nominal, equivalentes",
-          "Atualização monetária: inflação, correção"
-        ]
-      },
-      inf: {
-        name: "Informática",
-        contents: [
-          "Conceitos iniciais: bits, bytes, processamento de dados",
-          "Organização de computadores: CPU, memória, periféricos",
-          "Arquitetura básica: von Neumann, barramentos",
-          "Hardware básico: processador (clock, núcleos), placa-mãe",
-          "Memória RAM: tipos (DDR, SDRAM), volatilidade, uso temporário",
-          "Memória ROM: firmware, BIOS/UEFI, não-volátil",
-          "Hierarquia de memória: cache L1/L2/L3, RAM, disco",
-          "Dispositivos de armazenamento: HD (mecânico), SSD (flash)",
-          "RAID: níveis 0,1,5, configuração básica",
-          "Portas e conexões: USB (tipos A/B/C), HDMI, VGA",
-          "Sistemas operacionais básicos: funções (gerenciamento recursos)",
-          "Windows 10/11: interface, instalação, atualizações",
-          "Linux básico: distribuições (Ubuntu, RedHat), terminal",
-          "Gerenciamento de processos: escalonamento, prioridades",
-          "Gerenciamento de memória: virtual, paging, swapping",
-          "Usuários e grupos: permissões NTFS/Linux (chmod)",
-          "Atalhos de teclado Windows: Ctrl+C/V, Ctrl+Shift+Esc (gerenciador tarefas)",
-          "Redes básicas: conceitos LAN/WAN, topologias (estrela, anel)",
-          "Protocolos: TCP/IP v4/v6, camadas OSI",
-          "Configuração de rede: IP estático/dinâmico, DHCP",
-          "Redes wireless: Wi-Fi padrões (802.11), segurança WPA",
-          "Serviços de diretório: Active Directory, domínios, LDAP",
-          "Compartilhamento: arquivos/impressoras, permissões rede",
-          "Armazenamento em nuvem: OneDrive, sincronização, Google Drive",
-          "Segurança básica: firewalls, antivírus, backups"
-        ]
-      },
-      leg: {
-        name: "Legislação",
-        contents: [
-          "Conceitos básicos de legislação pública: leis, decretos, resoluções",
-          "Estatuto dos Servidores Públicos (Lei Complementar nº 9/1992): princípios gerais",
-          "Requisitos para ingresso: idade mínima, nacionalidade, obrigações eleitorais/militares",
-          "Ausências sem prejuízo: alistamento eleitor (1 dia), doação sangue (2 dias)",
-          "Férias: período aquisitivo (12 meses), restrições por faltas (>40 dias)",
-          "Lei Orgânica Municipal: estrutura, princípios de administração",
-          "Patrimônio cultural: levantamento científico, registro histórico",
-          "Abono familiar: concessão por cônjuge/filhos, requisitos econômicos",
-          "Legislação Educacional básica: princípios e fins da educação nacional",
-          "Níveis de ensino: Educação Infantil, Fundamental, Médio",
-          "Modalidades: Educação Especial, EJA, Profissional, Indígena",
-          "Lei 9.394/1996 – LDB: Parte 1 (organização da educação)",
-          "LDB Parte 2: diretrizes, bases, avaliação",
-          "Lei 13.005/2014 – PNE: metas, estratégias iniciais",
-          "Plano Estadual de Educação MG (Lei 23.197/2018): objetivos 2018-2027",
-          "BNCC: fundamentos pedagógicos, competências gerais",
-          "Currículo: inclusão, diversidade, direito à aprendizagem",
-          "Lei 869/1952 – Estatuto Servidores MG: direitos básicos",
-          "Lei 7.109/1977 – Estatuto Magistério MG: atribuições professores",
-          "Lei 15.293/2004 – Carreiras Educação MG: enquadramento, promoções",
-          "Decreto 46.644/2014 – Código de Conduta Ética",
-          "Resolução SEE nº 4.948/2024 – Organização Escolas Estaduais MG",
-          "Estatuto da Criança e Adolescente (Lei 8.069/1990 – ECA): direitos fundamentais",
-          "ECA avançado: proteção integral, responsabilidades",
-          "Lei 13.146/2015 – Estatuto Pessoa com Deficiência: acessibilidade",
-          "Lei 10.741/2003 – Estatuto Idoso: direitos sociais, saúde",
-          "Declaração de Salamanca: inclusão educacional",
-          "Declaração Universal Direitos Humanos: artigos principais",
-          "Constituição Federal: art. 5º (direitos individuais), art. 6º (sociais)",
-          "CF arts. 205-214: educação como direito",
-          "Constituição Estadual MG: Título IV, Cap. I, Seção III (educação)"
-        ]
-      },
-      dh: {
-        name: "Direitos Humanos",
-        contents: [
-          "Conceitos fundamentais: dignidade humana, igualdade, liberdade",
-          "Origem e evolução: pós-II Guerra, ONU",
-          "Tipos de direitos: civis (vida, propriedade), políticos (voto)",
-          "Direitos sociais: educação, saúde, trabalho",
-          "Direitos culturais e ambientais: patrimônio, sustentabilidade",
-          "Declaração Universal Direitos Humanos: preâmbulo, artigos 1-10",
-          "Declaração Universal: artigos 11-21 (liberdades)",
-          "Declaração Universal: artigos 22-30 (sociais, econômicos)",
-          "Convenções internacionais: Pacto Direitos Civis/Políticos",
-          "Papel do Estado: promoção, proteção, fiscalização",
-          "Direitos humanos na educação: equidade, não-discriminação",
-          "Inclusão educacional: acessibilidade, adaptações",
-          "Diversidade: gênero, raça, orientação sexual na escola",
-          "Combate à discriminação: bullying, assédio",
-          "Cartilha Enfrentamento Assédio Sexual Escolas (MG): conceitos, prevenção"
-        ]
-      },
-      rad: {
-        name: "Técnico em Radiologia",
-        contents: [
-          "Anatomia básica: esqueleto axial (crânio, coluna, tórax)",
-          "Esqueleto apendicular: membros superiores (ombro, braço, antebraço)",
-          "Membros inferiores: quadril, fêmur, joelho, perna, pé",
-          "Anatomia torácica: pulmões, coração, diafragma",
-          "Anatomia abdominal: órgãos (fígado, estômago), estruturas (intestinos)",
-          "Incidências radiográficas básicas: tórax PA/AP",
-          "Tórax lateral: decúbito com raios horizontais (Hjelm-Laurell para derrame pleural pequeno)",
-          "Abdome: simples decúbito (AP), ortostase (AP)",
-          "Abdome decúbito lateral (AP) para agudo",
-          "Posicionamento tórax PA: paciente ereto, costas chassi, ombros anteriorizados",
-          "Posicionamento decúbito lateral: direito/esquerdo, AP, braços elevados",
-          "Posicionamento membros superiores: mão oblíqua (cotovelo 90°, cunha 45°)",
-          "Ombro AP/neutro: braço estendido supinação, rotação externa",
-          "Idade óssea: braços extensão, mãos pronação chassi",
-          "Coluna cervical AP: ortostase, braços longos, cabeça fletida",
-          "Coluna toracolombar perfil: ortostase, braços longos",
-          "Coluna cervical perfil dinâmico: extensão/flexão máxima",
-          "Ética profissional básica: zelo máximo, atenção ao paciente",
-          "Sigilo: fato sigiloso em exercício profissão (infração revelar)",
-          "Vedações: fornecer info não específica formação",
-          "Física radiações básica: Raio-X produção, tubo (ânodo positivo)",
-          "Ânodo: número atômico (Z) e energia fótons",
-          "Radiação Bremsstrahlung: desaceleração elétrons no ânodo",
-          "Energia colisão: maior parte calor, menor Raio-X",
-          "Interação radiação-matéria: espalhamento Compton",
-          "Redução radiação espalhada: grade antidifusora",
-          "Air gap: aumento distância paciente-receptor"
-        ]
-      },
-      bio: {
-        name: "Biologia",
-        contents: [
-          "Química da vida: átomos, moléculas, água como solvente",
-          "Biomoléculas: carboidratos, lipídios",
-          "Proteínas e enzimas: estrutura, funções",
-          "Citologia básica: membrana plasmática, citoplasma",
-          "Organelas: núcleo, mitocôndrias, cloroplastos",
-          "Divisão celular: mitose fases (prófase, metáfase)",
-          "Meiose: redução cromossômica, crossing-over",
-          "Genética básica: leis Mendel (1ª lei segregação)",
-          "2ª lei Mendel: independência fatores",
-          "DNA/RNA: estrutura, replicação",
-          "Tradução proteica: código genético",
-          "Mutações: pontuais, cromossômicas",
-          "Biotecnologia: clonagem, transgênicos",
-          "Reprodução humana: gametogênese, fertilização",
-          "Intervenções: inseminação artificial, congelamento embriões",
-          "Fisiologia básica: sistema circulatório (coração, vasos)",
-          "Sistema respiratório: pulmões, trocas gasosas",
-          "Digestório: órgãos, absorção nutrientes",
-          "Nervoso e endócrino: neurônios, hormônios",
-          "Sistema imunológico: defesas, vacinas",
-          "Ecologia básica: níveis organização (população, comunidade)",
-          "Cadeias alimentares: produtores, consumidores, decompositores",
-          "Ciclos biogeoquímicos: carbono, nitrogênio",
-          "Biomas brasileiros: Amazônia, Cerrado, Mata Atlântica",
-          "Impactos ambientais: desmatamento, poluição, aquecimento global"
-        ]
-      },
-      ori: {
-        name: "Orientador Pedagógico",
-        contents: [
-          "Princípios educação nacional: igualdade acesso, gratuidade",
-          "Fins da educação: desenvolvimento pleno, cidadania",
-          "Níveis ensino: Infantil (desenvolvimento integral)",
-          "Ensino Fundamental: anos iniciais, competências básicas",
-          "Ensino Médio: formação geral, itinerários",
-          "Modalidades: Educação Especial (inclusiva)",
-          "EJA e Educação Profissional: adaptações adultas",
-          "Organização Escolas Estaduais MG: estrutura administrativa",
-          "Atribuições Especialistas Educação Básica: supervisor, orientador",
-          "Papel supervisor/orientador: apoio pedagógico, mediação",
-          "Prática pedagógica: planejamento participativo, gestão sala aula",
-          "Interdisciplinaridade: integração disciplinas, projetos",
-          "Projeto Político-Pedagógico (PPP): elaboração coletiva",
-          "Plano ensino e aula: objetivos, conteúdos, métodos",
-          "Avaliação aprendizagem: formativa, somativa, inclusiva",
-          "Avaliação externa: SAEB, Prova Brasil",
-          "Gestão democrática: princípios, participação comunidade",
-          "Instrumentos gestão: colegiados escolares, conselhos classe",
-          "Relação escola-família-comunidade: parcerias, comunicação",
-          "Educação Especial Inclusiva: práticas acessíveis, adaptações",
-          "Política Educação Integral: tempo integral, atividades complementares"
-        ]
+  <div class="wrap">
+    <!-- Treino do dia -->
+    <section class="card">
+      <div class="cardHead">
+        <h2>📅 Treino</h2>
+        <span class="pill" id="pillTitle">Hoje</span>
+      </div>
+      <div class="cardBody">
+        <div class="tabs" id="dayTabs"></div>
+        <div class="smallText" id="dayDesc"></div>
+        <div class="hr"></div>
+        <div id="workoutList"></div>
+      </div>
+    </section>
+
+    <!-- Histórico -->
+    <section class="card historyCard">
+      <div class="cardHead">
+        <h2>📈 Histórico rápido</h2>
+        <span class="pill">últimas 10</span>
+      </div>
+      <div class="cardBody">
+        <div class="smallText">Mostra suas últimas séries registradas. Exporta CSV para ver evolução no Excel/Sheets.</div>
+        <div class="hr"></div>
+        <div id="history"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Bottom Sheet: TIMER + KPIs -->
+  <div class="sheet">
+    <div class="sheetInner">
+      <div class="timerCard">
+        <div class="timerTop">
+          <div class="timerTitle">
+            <b id="timerExercise">Nenhuma série concluída ainda</b>
+            <span id="timerHint">Quando você marcar uma série como feita, o descanso começa.</span>
+          </div>
+          <div class="time" id="timerTime">00:00</div>
+        </div>
+
+        <div class="timerBtns">
+          <button id="btnStartStop">Iniciar</button>
+          <button id="btnPlus20">+20s</button>
+          <button id="btnResetTimer">Zerar</button>
+        </div>
+
+        <div class="kpis">
+          <div class="stat">
+            <div class="label">Séries hoje</div>
+            <div class="value" id="kpiSetsToday">0</div>
+          </div>
+          <div class="stat">
+            <div class="label">Carga total (kg)</div>
+            <div class="value" id="kpiTonnageToday">0</div>
+          </div>
+        </div>
+
+        <div class="stat">
+          <div class="label">Último registro</div>
+          <div class="value" id="kpiLastLog">Nenhum</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Salvo ✅</div>
+
+<script>
+/* =========================
+   1) PLANO DE TREINO (fixo)
+   ========================= */
+const PLAN = {
+  "Segunda": {
+    title: "PUSH (Peito + Tríceps)",
+    desc: "Foco em carga nos compostos e reps moderadas/altas nos isoladores para hipertrofia natural com boa recuperação.",
+    exercises: [
+      { name: "Supino inclinado", target: "4x 6–8", restSec: 150, note: "Composto pesado. Progrida carga ou reps." , sets: 4, repMin: 6, repMax: 8 },
+      { name: "Crucifixo na máquina", target: "3x 10–12", restSec: 75, note: "Controle e alongamento." , sets: 3, repMin: 10, repMax: 12 },
+      { name: "Paralelas (tronco levemente à frente)", target: "3x 8–12", restSec: 105, note: "Pode usar peso extra quando bater 12 reps." , sets: 3, repMin: 8, repMax: 12 },
+      { name: "Tríceps francês", target: "3x 8–10", restSec: 90, note: "Amplitude e cotovelo estável." , sets: 3, repMin: 8, repMax: 10 },
+      { name: "Extensão na polia (barra)", target: "3x 12–15", restSec: 75, note: "Finalização, sem estourar o cotovelo." , sets: 3, repMin: 12, repMax: 15 }
+    ]
+  },
+
+  "Terça": {
+    title: "PULL (Costas + Bíceps)",
+    desc: "Costas respondem muito bem a tensão e volume bem controlado. Bíceps com alongamento e técnica limpa.",
+    exercises: [
+      { name: "Puxada aberta na polia", target: "4x 6–8", restSec: 150, note: "Composto. Ombros longe das orelhas." , sets: 4, repMin: 6, repMax: 8 },
+      { name: "Pulldown com corda", target: "3x 10–12", restSec: 90, note: "Pico de contração e controle." , sets: 3, repMin: 10, repMax: 12 },
+      { name: "Remada aberta com halteres", target: "3x 8–10", restSec: 120, note: "Espessura. Tronco firme." , sets: 3, repMin: 8, repMax: 10 },
+      { name: "Rosca no banco inclinado", target: "3x 8–10", restSec: 90, note: "Alongamento máximo, sem roubo." , sets: 3, repMin: 8, repMax: 10 },
+      { name: "Rosca Scott", target: "3x 10–12", restSec: 75, note: "Isolamento. Controle total." , sets: 3, repMin: 10, repMax: 12 }
+    ]
+  },
+
+  "Quarta": {
+    title: "LEGS (Quadríceps + Complementos)",
+    desc: "Quadríceps com carga e volume, posterior com manutenção, e reps altas em abdutor/adutor e panturrilha.",
+    exercises: [
+      { name: "Agachamento no Smith", target: "4x 6–8", restSec: 165, note: "Tensão no quadríceps, desça controlando." , sets: 4, repMin: 6, repMax: 8 },
+      { name: "Leg press 45°", target: "3x 10–12", restSec: 120, note: "Amplitude segura. Não trave joelhos." , sets: 3, repMin: 10, repMax: 12 },
+      { name: "Cadeira extensora", target: "3x 12–15", restSec: 75, note: "Finalização. Segura 1s no topo." , sets: 3, repMin: 12, repMax: 15 },
+      { name: "Cadeira flexora", target: "3x 10–12", restSec: 90, note: "Posterior com controle." , sets: 3, repMin: 10, repMax: 12 },
+      { name: "Cadeira abdutora", target: "3x 15–20", restSec: 60, note: "Músculo resistente. Reps altas." , sets: 3, repMin: 15, repMax: 20 },
+      { name: "Panturrilha em pé (máquina)", target: "4x 8–12", restSec: 75, note: "Pausa de 1s no pico. Desça completo." , sets: 4, repMin: 8, repMax: 12 },
+      { name: "Panturrilha sentada (máquina)", target: "3x 12–20", restSec: 60, note: "Mais reps. Controle total." , sets: 3, repMin: 12, repMax: 20 }
+    ]
+  },
+
+  "Quinta": {
+    title: "UPPER BODY (Peito + Costas + Ombros)",
+    desc: "Dia de volume moderado na parte superior. Excelente para natural: frequência e recuperação equilibradas.",
+    exercises: [
+      { name: "Supino inclinado", target: "3x 8–10", restSec: 120, note: "Moderado. Foque técnica." , sets: 3, repMin: 8, repMax: 10 },
+      { name: "Crucifixo", target: "3x 12–15", restSec: 75, note: "Metabólico, controle." , sets: 3, repMin: 12, repMax: 15 },
+      { name: "Flexão (pegada fechada)", target: "2–3x 12–20", restSec: 60, note: "Quase falha na última série." , sets: 3, repMin: 12, repMax: 20 },
+      { name: "Puxada unilateral", target: "3x 10–12", restSec: 90, note: "Sinta dorsal trabalhando." , sets: 3, repMin: 10, repMax: 12 },
+      { name: "Remada baixa", target: "3x 8–10", restSec: 120, note: "Espessura. Escápulas controladas." , sets: 3, repMin: 8, repMax: 10 },
+      { name: "Desenvolvimento (ombros)", target: "3x 6–8", restSec: 150, note: "Carga com controle. Sem dor." , sets: 3, repMin: 6, repMax: 8 },
+      { name: "Elevação lateral na polia", target: "3x 12–15", restSec: 60, note: "Deltoide lateral gosta de reps." , sets: 3, repMin: 12, repMax: 15 }
+    ]
+  },
+
+  "Sexta": {
+    title: "POSTERIOR (Posterior + Complementos)",
+    desc: "Posterior responde muito bem a tensão mecânica e alongamento. Completa com extensora, adutor e panturrilhas.",
+    exercises: [
+      { name: "Stiff", target: "4x 6–8", restSec: 165, note: "Pesado e técnico. Coluna neutra." , sets: 4, repMin: 6, repMax: 8 },
+      { name: "Mesa flexora", target: "3x 8–10", restSec: 90, note: "Força e controle." , sets: 3, repMin: 8, repMax: 10 },
+      { name: "Cadeira flexora", target: "3x 12–15", restSec: 75, note: "Finalização metabólica." , sets: 3, repMin: 12, repMax: 15 },
+      { name: "Cadeira extensora", target: "3x 12–15", restSec: 60, note: "Manutenção do quad." , sets: 3, repMin: 12, repMax: 15 },
+      { name: "Cadeira adutora", target: "3x 15–20", restSec: 60, note: "Reps altas. Controle." , sets: 3, repMin: 15, repMax: 20 },
+      { name: "Panturrilha em pé", target: "4x 8–12", restSec: 75, note: "Pausa no topo." , sets: 4, repMin: 8, repMax: 12 },
+      { name: "Panturrilha sentada", target: "3x 15–20", restSec: 60, note: "Alta repetição." , sets: 3, repMin: 15, repMax: 20 }
+    ]
+  },
+
+  "Sábado": { title: "OFF / Recuperação", desc: "Caminhada leve, mobilidade e sono. Natural cresce no descanso.", exercises: [] },
+  "Domingo": { title: "OFF / Recuperação", desc: "Se quiser, alongamento e 15–25 min de cardio leve.", exercises: [] }
+};
+
+const DAY_ORDER = ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+
+/* =========================
+   2) STORAGE
+   ========================= */
+const STORAGE_KEY = "treino_tracker_v1";
+const getState = () => {
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return { logs: [], ui: {} };
+    return JSON.parse(raw);
+  }catch(e){
+    return { logs: [], ui: {} };
+  }
+};
+const setState = (state) => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+/* =========================
+   3) HELPERS
+   ========================= */
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+function isoToday(){
+  const d = new Date();
+  const pad = (n)=> String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function dayNameFromDate(dateObj){
+  const map = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+  return map[dateObj.getDay()];
+}
+function formatDateBR(iso){
+  const [y,m,d] = iso.split("-").map(Number);
+  return `${String(d).padStart(2,"0")}/${String(m).padStart(2,"0")}/${y}`;
+}
+function fmtTime(sec){
+  sec = Math.max(0, Math.floor(sec));
+  const mm = String(Math.floor(sec/60)).padStart(2,"0");
+  const ss = String(sec%60).padStart(2,"0");
+  return `${mm}:${ss}`;
+}
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=> t.classList.remove("show"), 1200);
+}
+function uid(){
+  return Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+
+/* =========================
+   4) TIMER
+   ========================= */
+let timer = { running:false, remaining:0, interval:null, exercise:"", defaultRest:0 };
+
+function timerRender(){
+  $("#timerExercise").textContent = timer.exercise || "Nenhuma série concluída ainda";
+  $("#timerTime").textContent = fmtTime(timer.remaining);
+  $("#btnStartStop").textContent = timer.running ? "Pausar" : "Iniciar";
+  $("#timerHint").textContent = timer.exercise
+    ? `Descanso sugerido: ${Math.round(timer.defaultRest/60)} min (ajuste se quiser).`
+    : "Quando você marcar uma série como feita, o descanso começa.";
+}
+function timerStart(){
+  if(timer.running) return;
+  timer.running = true;
+  timer.interval = setInterval(()=>{
+    timer.remaining -= 1;
+    if(timer.remaining <= 0){
+      timer.remaining = 0;
+      timerStop();
+      toast("Descanso finalizado 🔔");
+    }
+    timerRender();
+  }, 1000);
+  timerRender();
+}
+function timerStop(){
+  timer.running = false;
+  if(timer.interval) clearInterval(timer.interval);
+  timer.interval = null;
+  timerRender();
+}
+function timerReset(toSec = null){
+  timerStop();
+  timer.remaining = (toSec !== null) ? toSec : (timer.defaultRest || 0);
+  timerRender();
+}
+function timerAdd(sec){
+  timer.remaining += sec;
+  timerRender();
+}
+
+/* =========================
+   5) UI RENDER
+   ========================= */
+let selectedDay = null;
+
+function getLogsFor(dateISO, dayName, exName){
+  const st = getState();
+  return st.logs.filter(l =>
+    l.dateISO === dateISO &&
+    l.dayName === dayName &&
+    l.exerciseName === exName
+  ).sort((a,b)=> a.setIndex - b.setIndex);
+}
+function latestForExercise(exName){
+  const st = getState();
+  const logs = st.logs.filter(l => l.exerciseName === exName)
+    .sort((a,b)=> b.createdAt - a.createdAt);
+  return logs[0] || null;
+}
+
+function renderTabs(todayName){
+  const el = $("#dayTabs");
+  el.innerHTML = "";
+  DAY_ORDER.forEach(day=>{
+    const b = document.createElement("div");
+    b.className = "tab" + (day === selectedDay ? " active" : "");
+    b.textContent = day;
+    b.title = (day === todayName) ? "Hoje" : "Ver treino";
+    b.addEventListener("click", ()=>{
+      selectedDay = day;
+      renderAll();
+    });
+    el.appendChild(b);
+  });
+}
+
+function renderWorkout(){
+  const todayISO = isoToday();
+  const plan = PLAN[selectedDay];
+  $("#dayDesc").textContent = plan.desc;
+  $("#pillTitle").textContent = plan.title;
+
+  const container = $("#workoutList");
+  container.innerHTML = "";
+
+  if(!plan.exercises.length){
+    container.innerHTML = `
+      <div class="hint">
+        <b>${plan.title}</b><br>
+        Dia off. Se quiser: 15–25 min caminhada leve + mobilidade.
+      </div>
+    `;
+    return;
+  }
+
+  plan.exercises.forEach(ex=>{
+    const details = document.createElement("details");
+
+    const last = latestForExercise(ex.name);
+    const lastStr = last ? `${last.weight}kg x ${last.reps} (${formatDateBR(last.dateISO)})` : "sem histórico";
+    const doneLogs = getLogsFor(todayISO, selectedDay, ex.name);
+    const doneCount = doneLogs.length;
+
+    const summary = document.createElement("summary");
+    summary.innerHTML = `
+      <div class="sumLeft">
+        <div class="exName">${ex.name}</div>
+        <div class="exMeta">Alvo: <b>${ex.target}</b> • Descanso: <b>${Math.round(ex.restSec/60)} min</b></div>
+      </div>
+      <div class="sumRight">
+        <span class="kpi">${doneCount}/${ex.sets}</span>
+        <span class="kpi">${lastStr}</span>
+      </div>
+    `;
+    details.appendChild(summary);
+
+    const body = document.createElement("div");
+    body.className = "exBody";
+
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+      <tr>
+        <th style="width:60px">#</th>
+        <th style="width:42%">Peso</th>
+        <th style="width:26%">Reps</th>
+        <th style="width:32%">OK</th>
+      </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    for(let i=1;i<=ex.sets;i++){
+      const prev = doneLogs.find(l => l.setIndex === i) || null;
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td style="font-family:var(--mono);font-weight:900">#${i}</td>
+        <td><input type="number" step="0.5" min="0" inputmode="decimal" placeholder="kg"
+              value="${prev ? prev.weight : ""}" data-field="weight" data-set="${i}"></td>
+        <td><input type="number" step="1" min="0" inputmode="numeric" placeholder="reps"
+              value="${prev ? prev.reps : ""}" data-field="reps" data-set="${i}"></td>
+        <td style="text-align:right">
+          <button class="mini ${prev ? "btnPrimary" : ""}" data-action="done" data-set="${i}">
+            ${prev ? "Feito ✅" : "Marcar"}
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+
+    const hint = document.createElement("div");
+    hint.className = "hint";
+    hint.innerHTML = `
+      <b>Objetivo</b><br>
+      ${ex.note}<br>
+      <span class="smallText">Zona de reps: ${ex.repMin}–${ex.repMax}. Quando bater o topo com técnica boa, sobe 2–5% na próxima sessão.</span>
+    `;
+
+    const actions = document.createElement("div");
+    actions.className = "rowActions";
+    actions.innerHTML = `
+      <button class="mini" data-action="copyLast">Usar último peso/reps</button>
+      <button class="mini btnDanger" data-action="clearToday">Limpar hoje</button>
+    `;
+
+    body.appendChild(table);
+    body.appendChild(hint);
+    body.appendChild(actions);
+
+    body.addEventListener("click", (ev)=>{
+      const btn = ev.target.closest("button");
+      if(!btn) return;
+      const action = btn.dataset.action;
+      if(action === "done"){
+        const setIndex = Number(btn.dataset.set);
+        onMarkSetDone(ex, setIndex, body);
       }
-    };
-
-    const subjectKeys = Object.keys(subjects);
-
-    // Intercalar conteúdos progressivamente
-    const bigContentList = [];
-    const pointers = subjectKeys.reduce((acc, key) => { acc[key] = 0; return acc; }, {});
-    let hasMore = true;
-    while (hasMore) {
-      hasMore = false;
-      for (let key of subjectKeys) {
-        if (pointers[key] < subjects[key].contents.length) {
-          bigContentList.push({
-            subject: subjects[key].name,
-            content: subjects[key].contents[pointers[key]]
-          });
-          pointers[key]++;
-          hasMore = true;
-        }
-      }
-    }
-
-    const calendar = document.getElementById("calendar");
-    const monthYear = document.getElementById("monthYear");
-
-    const startDate = new Date(2025, 9, 6); // 6 de outubro de 2025
-    // Iniciar no mês atual
-    let currentDate = new Date(); // Usa a data atual do sistema
-
-    function getStudyDayIndex(date) {
-      let index = 0;
-      let tempDate = new Date(startDate);
-      while (tempDate < date) {
-        const dayOfWeek = tempDate.getDay();
-        if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Mon-Fri
-          index++;
-        }
-        tempDate.setDate(tempDate.getDate() + 1);
-      }
-      return index;
-    }
-
-    function isRedacaoDay(date) {
-      const daysFromStart = Math.floor((date - startDate) / (1000 * 60 * 60 * 24));
-      return daysFromStart % 15 === 0 && date.getDay() === 6; // Aproxima para sábados a cada 15 dias
-    }
-
-    function renderCalendar(year, month) {
-      calendar.innerHTML = "";
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-      const monthNames = [
-        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-      ];
-      monthYear.textContent = `${monthNames[month]} / ${year}`;
-
-      // Espaços vazios
-      for (let i = 0; i < firstDay; i++) {
-        const empty = document.createElement("div");
-        calendar.appendChild(empty);
-      }
-
-      for (let dia = 1; dia <= daysInMonth; dia++) {
-        const dayBox = document.createElement("div");
-        dayBox.classList.add("day");
-
-        const title = document.createElement("h3");
-        title.textContent = dia;
-        dayBox.appendChild(title);
-
-        const date = new Date(year, month, dia);
-        const dayOfWeek = date.getDay();
-        const dateKey = `${year}-${month + 1}-${dia}`;
-
-        if (date < startDate) {
-          dayBox.classList.add("free");
-        } else if (dayOfWeek === 0) { // Domingo
-          dayBox.classList.add("free");
-          const rest = document.createElement("div");
-          rest.classList.add("rest");
-          rest.textContent = "Descanso";
-          dayBox.appendChild(rest);
-        } else if (dayOfWeek === 6) { // Sábado
-          const review = document.createElement("div");
-          review.classList.add("subject");
-          review.textContent = "Revisão Semanal";
-          review.addEventListener("click", () => toggleDone(review, dateKey, 0));
-          dayBox.appendChild(review);
-
-          if (isRedacaoDay(date)) {
-            const redacao = document.createElement("div");
-            redacao.classList.add("subject");
-            redacao.textContent = "Redação";
-            redacao.addEventListener("click", () => toggleDone(redacao, dateKey, 1));
-            dayBox.appendChild(redacao);
-          }
-        } else { // Dias de estudo (Seg-Sex)
-          const studyIndex = getStudyDayIndex(date);
-          const startContent = studyIndex * 2;
-          if (startContent < bigContentList.length) {
-            const dayContents = bigContentList.slice(startContent, startContent + 2);
-            dayContents.forEach((item, idx) => {
-              if (item) {
-                const subject = document.createElement("div");
-                subject.classList.add("subject");
-                subject.textContent = `${item.subject}: ${item.content}`;
-                subject.addEventListener("click", () => toggleDone(subject, dateKey, idx));
-                dayBox.appendChild(subject);
-              }
-            });
-          }
-        }
-
-        // Carregar status salvos
-        loadDoneStatus(dayBox, dateKey);
-
-        calendar.appendChild(dayBox);
-      }
-    }
-
-    function toggleDone(element, dateKey, index) {
-      element.classList.toggle("done");
-      saveDoneStatus(dateKey);
-      updateDayStatus(element.parentNode, dateKey);
-    }
-
-    function saveDoneStatus(dateKey) {
-      const dayBox = document.querySelector(`[data-date="${dateKey}"]`) || event.target.parentNode;
-      const subjects = dayBox.querySelectorAll(".subject");
-      const doneArray = Array.from(subjects).map(s => s.classList.contains("done"));
-      localStorage.setItem(`done_${dateKey}`, JSON.stringify(doneArray));
-    }
-
-    function loadDoneStatus(dayBox, dateKey) {
-      dayBox.dataset.date = dateKey;
-      const saved = localStorage.getItem(`done_${dateKey}`);
-      if (saved) {
-        const doneArray = JSON.parse(saved);
-        const subjects = dayBox.querySelectorAll(".subject");
-        subjects.forEach((s, idx) => {
-          if (doneArray[idx]) s.classList.add("done");
-        });
-        updateDayStatus(dayBox, dateKey);
-      }
-    }
-
-    function updateDayStatus(dayBox, dateKey) {
-      const subjects = dayBox.querySelectorAll(".subject");
-      const allDone = Array.from(subjects).every(s => s.classList.contains("done"));
-      if (allDone && subjects.length > 0) {
-        dayBox.classList.add("complete");
-      } else {
-        dayBox.classList.remove("complete");
-      }
-    }
-
-    // Navegação
-    document.getElementById("prevMonth").addEventListener("click", () => {
-      currentDate.setMonth(currentDate.getMonth() - 1);
-      renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
+      if(action === "copyLast") onCopyLast(ex, body);
+      if(action === "clearToday") onClearToday(ex);
     });
 
-    document.getElementById("nextMonth").addEventListener("click", () => {
-      currentDate.setMonth(currentDate.getMonth() + 1);
-      renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
-    });
+    details.appendChild(body);
+    container.appendChild(details);
+  });
+}
 
-    // Inicializar no mês atual
-    renderCalendar(currentDate.getFullYear(), currentDate.getMonth());
-  </script>
+function readInputsForSet(body, setIndex){
+  const w = body.querySelector(`input[data-field="weight"][data-set="${setIndex}"]`);
+  const r = body.querySelector(`input[data-field="reps"][data-set="${setIndex}"]`);
+  const weight = w ? Number(w.value) : NaN;
+  const reps = r ? Number(r.value) : NaN;
+  return { weight, reps };
+}
+
+function onMarkSetDone(ex, setIndex, body){
+  const { weight, reps } = readInputsForSet(body, setIndex);
+
+  if(!Number.isFinite(weight) || weight <= 0){ toast("Coloque o peso ✅"); return; }
+  if(!Number.isFinite(reps) || reps <= 0){ toast("Coloque as reps ✅"); return; }
+
+  const st = getState();
+  const todayISO = isoToday();
+
+  st.logs = st.logs.filter(l => !(l.dateISO === todayISO && l.dayName === selectedDay && l.exerciseName === ex.name && l.setIndex === setIndex));
+
+  st.logs.push({
+    id: uid(),
+    dateISO: todayISO,
+    dayName: selectedDay,
+    workoutTitle: PLAN[selectedDay].title,
+    exerciseName: ex.name,
+    setIndex,
+    weight,
+    reps,
+    targetText: ex.target,
+    restSec: ex.restSec,
+    createdAt: Date.now()
+  });
+
+  setState(st);
+  toast("Série salva ✅");
+
+  timer.exercise = ex.name;
+  timer.defaultRest = ex.restSec;
+  timerReset(ex.restSec);
+  timerStart();
+
+  renderAll();
+}
+
+function onCopyLast(ex, body){
+  const last = latestForExercise(ex.name);
+  if(!last){ toast("Sem histórico"); return; }
+  for(let i=1;i<=ex.sets;i++){
+    const w = body.querySelector(`input[data-field="weight"][data-set="${i}"]`);
+    const r = body.querySelector(`input[data-field="reps"][data-set="${i}"]`);
+    if(w && !w.value) w.value = last.weight;
+    if(r && !r.value) r.value = last.reps;
+  }
+  toast("Preenchido ✅");
+}
+
+function onClearToday(ex){
+  const st = getState();
+  const todayISO = isoToday();
+  const before = st.logs.length;
+  st.logs = st.logs.filter(l => !(l.dateISO === todayISO && l.dayName === selectedDay && l.exerciseName === ex.name));
+  setState(st);
+  const removed = before - st.logs.length;
+  toast(removed ? "Hoje limpo" : "Nada p/ apagar");
+  renderAll();
+}
+
+function computeKPIs(){
+  const st = getState();
+  const todayISO = isoToday();
+  const todayLogs = st.logs.filter(l => l.dateISO === todayISO);
+
+  const setsToday = todayLogs.length;
+  let tonnage = 0;
+  todayLogs.forEach(l => tonnage += (Number(l.weight)||0) * (Number(l.reps)||0));
+
+  const last = st.logs.slice().sort((a,b)=> b.createdAt - a.createdAt)[0] || null;
+
+  $("#kpiSetsToday").textContent = setsToday.toString();
+  $("#kpiTonnageToday").textContent = Math.round(tonnage).toString();
+  $("#kpiLastLog").textContent = last ? `${last.exerciseName} (${last.weight}kg x ${last.reps})` : "Nenhum";
+}
+
+function renderHistory(){
+  const st = getState();
+  const logs = st.logs.slice().sort((a,b)=> b.createdAt - a.createdAt).slice(0, 10);
+
+  const el = $("#history");
+  if(!logs.length){
+    el.innerHTML = `<div class="hint">Sem registros ainda. Marca uma série como feita que aparece aqui.</div>`;
+    return;
+  }
+
+  const rows = logs.map(l => `
+      <tr>
+        <td>${formatDateBR(l.dateISO)}</td>
+        <td>${l.dayName}</td>
+        <td>${l.exerciseName}</td>
+        <td style="font-family:var(--mono);font-weight:900">#${l.setIndex}</td>
+        <td>${l.weight}</td>
+        <td>${l.reps}</td>
+      </tr>
+  `).join("");
+
+  el.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Dia</th>
+          <th>Exercício</th>
+          <th>Série</th>
+          <th>Peso</th>
+          <th>Reps</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function renderAll(){
+  const today = new Date();
+  const todayName = dayNameFromDate(today);
+  const todayISO = isoToday();
+
+  if(!selectedDay) selectedDay = todayName;
+
+  $("#todayPill").textContent = `${todayName} • ${formatDateBR(todayISO)} • ${PLAN[selectedDay].title}`;
+
+  renderTabs(todayName);
+  $$("#dayTabs .tab").forEach(t=> t.classList.toggle("active", t.textContent === selectedDay));
+
+  renderWorkout();
+  computeKPIs();
+  renderHistory();
+  timerRender();
+}
+
+/* =========================
+   6) EXPORT / BACKUP / IMPORT / RESET
+   ========================= */
+function safeCSV(v){
+  const s = String(v ?? "");
+  if(/[",\n]/.test(s)) return `"${s.replaceAll('"','""')}"`;
+  return s;
+}
+
+function exportCSV(){
+  const st = getState();
+  const logs = st.logs.slice().sort((a,b)=> a.createdAt - b.createdAt);
+  if(!logs.length){ toast("Nada p/ exportar"); return; }
+
+  const header = ["data","dia","treino","exercicio","serie","peso_kg","reps","alvo","descanso_seg"];
+  const lines = [header.join(",")];
+
+  logs.forEach(l=>{
+    lines.push([
+      l.dateISO,
+      safeCSV(l.dayName),
+      safeCSV(l.workoutTitle),
+      safeCSV(l.exerciseName),
+      l.setIndex,
+      l.weight,
+      l.reps,
+      safeCSV(l.targetText),
+      l.restSec
+    ].join(","));
+  });
+
+  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `treino_logs_${isoToday()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("CSV ✅");
+}
+
+function backupJSON(){
+  const st = getState();
+  const blob = new Blob([JSON.stringify(st, null, 2)], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `treino_backup_${isoToday()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("Backup ✅");
+}
+
+function importJSON(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const obj = JSON.parse(reader.result);
+      if(!obj || !Array.isArray(obj.logs)) throw new Error("Formato inválido");
+      setState(obj);
+      toast("Importado ✅");
+      renderAll();
+    }catch(e){
+      toast("Falhou ❌");
+      alert("Arquivo inválido. Use um backup JSON gerado pelo próprio site.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetAll(){
+  if(!confirm("Apagar tudo? Isso remove seus registros do navegador.")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  timerReset(0);
+  timer.exercise = "";
+  timer.defaultRest = 0;
+  toast("Reset ✅");
+  renderAll();
+}
+
+/* =========================
+   7) EVENTS
+   ========================= */
+$("#btnExport").addEventListener("click", exportCSV);
+$("#btnBackup").addEventListener("click", backupJSON);
+$("#btnReset").addEventListener("click", resetAll);
+
+$("#importFile").addEventListener("change", (ev)=>{
+  const file = ev.target.files?.[0];
+  if(file) importJSON(file);
+  ev.target.value = "";
+});
+
+$("#btnStartStop").addEventListener("click", ()=> timer.running ? timerStop() : timerStart());
+$("#btnPlus20").addEventListener("click", ()=> timerAdd(20));
+$("#btnResetTimer").addEventListener("click", ()=> timerReset(null));
+
+/* INIT */
+renderAll();
+</script>
 </body>
 </html>
